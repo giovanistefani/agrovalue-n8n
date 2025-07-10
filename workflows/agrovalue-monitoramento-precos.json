@@ -1,0 +1,145 @@
+{
+  "name": "AgroValue - Monitoramento de Preços",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.exemplo.com/precos-agricolas",
+        "options": {
+          "headers": {
+            "Authorization": "Bearer {{$env.API_TOKEN}}"
+          }
+        }
+      },
+      "name": "HTTP Request - Preços",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.preco_soja}}",
+              "operation": "larger",
+              "value2": 150
+            }
+          ]
+        }
+      },
+      "name": "IF - Preço Alto",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "generic",
+        "genericAuthType": "httpBasicAuth",
+        "service": "gmail",
+        "options": {},
+        "subject": "Alerta: Preço da Soja Alto",
+        "message": "O preço da soja está em R$ {{$json.preco_soja}}/saca.\n\nMonitoramento AgroValue",
+        "toEmail": "admin@agrovalue.com"
+      },
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "precos_historicos",
+        "columns": "data, produto, preco, fonte",
+        "additionalFields": {
+          "mode": "independently"
+        }
+      },
+      "name": "PostgreSQL - Salvar",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        460,
+        480
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "AgroValue DB"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Preços",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Preços": {
+      "main": [
+        [
+          {
+            "node": "IF - Preço Alto",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PostgreSQL - Salvar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Preço Alto": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "id": "1"
+}
