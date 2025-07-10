@@ -1,121 +1,99 @@
-# AgroValue N8N - Automação Econômica e Escalável
+# AgroValue N8N
 
-## 📋 Descrição
+Este repositório contém a configuração para a instância do n8n da AgroValue, preparada para rodar tanto em ambiente de desenvolvimento local quanto em produção na AWS.
 
-Este projeto fornece uma configuração completa para executar o n8n (plataforma de automação de workflows) tanto localmente quanto na AWS de forma econômica e escalável. O projeto inclui configurações Docker, infraestrutura como código com Terraform, e scripts de automação.
+## Visão Geral
 
-## 🚀 Características
+O [n8n](https://n8n.io/) é uma ferramenta de automação de fluxo de trabalho de código aberto. Esta configuração utiliza Docker e Docker Compose para facilitar o deploy e garantir a consistência entre os ambientes.
 
-- **Desenvolvimento Local**: Docker Compose para desenvolvimento rápido
-- **Produção AWS**: Configuração otimizada com ECS Fargate e RDS
-- **Escalabilidade**: Auto-scaling baseado em métricas
-- **Economia**: Instâncias Spot, backup automatizado, e recursos otimizados
-- **Segurança**: VPC, subnets privadas, e configurações de segurança
+- **Desenvolvimento Local**: Usa o banco de dados SQLite padrão do n8n para simplicidade e rapidez.
+- **Produção (AWS)**: Projetado para usar um banco de dados PostgreSQL para maior robustez e escalabilidade.
 
-## 📁 Estrutura do Projeto
+## Pré-requisitos
 
-```
-├── docker/                 # Configurações Docker
-├── terraform/             # Infraestrutura AWS (IaC)
-├── scripts/               # Scripts de automação e deploy
-├── workflows/             # Workflows n8n de exemplo
-├── configs/               # Configurações específicas
-└── docs/                  # Documentação detalhada
-```
+Certifique-se de ter as seguintes ferramentas instaladas em sua máquina:
 
-## 🛠️ Configuração Local
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
-### Pré-requisitos
+## Configuração para Desenvolvimento Local
 
-- Docker e Docker Compose
-- Node.js 18+ (opcional para desenvolvimento)
-- AWS CLI configurado (para deploy)
-- Terraform (para infraestrutura)
+Siga os passos abaixo para executar o n8n em sua máquina local.
 
-### Executar Localmente
+### 1. Clone o Repositório
 
 ```bash
-# Clonar o repositório
-git clone <repository-url>
+git clone <URL_DO_SEU_REPOSITORIO>
 cd agrovalue-n8n
-
-# Executar com Docker Compose
-./scripts/start-local.sh
-
-# Acessar n8n
-open http://localhost:5678
 ```
 
-## ☁️ Deploy na AWS
+### 2. Crie o Arquivo de Ambiente
 
-### Configuração Inicial
+Copie o arquivo de exemplo `.env.example` para um novo arquivo chamado `.env`.
 
 ```bash
-# Configurar variáveis de ambiente
-cp configs/.env.example configs/.env.production
-# Editar configs/.env.production com suas configurações
-
-# Deploy da infraestrutura
-./scripts/deploy-aws.sh
+cp .env.example .env
 ```
 
-### Arquitetura AWS
+O arquivo `.env` já vem pré-configurado para o ambiente de desenvolvimento. Você não precisa alterá-lo para começar.
 
-- **ECS Fargate**: Para executar containers n8n de forma serverless
-- **RDS PostgreSQL**: Banco de dados gerenciado e otimizado
-- **Application Load Balancer**: Distribuição de carga e SSL
-- **CloudWatch**: Monitoramento e logs
-- **Auto Scaling**: Escalabilidade automática baseada em CPU/memória
+### 3. Inicie os Contêineres
 
-## 💰 Otimizações de Custo
+Use o Docker Compose para construir e iniciar o serviço do n8n.
 
-1. **Instâncias Spot**: Redução de até 70% nos custos de compute
-2. **Auto Scaling**: Recursos ajustados automaticamente à demanda
-3. **RDS Scheduled Scaling**: Banco escala conforme necessário
-4. **CloudWatch Alarms**: Monitoramento inteligente de custos
-5. **Backup Lifecycle**: Retenção otimizada de backups
+```bash
+docker-compose up -d
+```
 
-## 📊 Monitoramento
+O `-d` executa os contêineres em modo "detached" (em segundo plano).
 
-- Dashboard CloudWatch personalizado
-- Alertas de performance e custos
-- Logs centralizados
-- Métricas customizadas de workflows
+### 4. Acesse o n8n
 
-## 🔒 Segurança
+Após a inicialização, o n8n estará disponível no seu navegador em:
+**http://localhost:5678**
 
-- VPC isolada com subnets privadas
-- Grupos de segurança restritivos
-- Secrets Manager para credenciais
-- SSL/TLS end-to-end
-- IAM roles com princípio de menor privilégio
+Os dados dos seus workflows e credenciais serão salvos no diretório `n8n_data`, que é ignorado pelo Git.
 
-## 📚 Documentação
+## Estrutura do Projeto
 
-Consulte a pasta `docs/` para documentação detalhada sobre:
+```
+├── .gitignore          # Arquivos e diretórios a serem ignorados pelo Git
+├── docker-compose.yml  # Define os serviços, redes e volumes do Docker
+├── .env.example        # Arquivo de exemplo para as variáveis de ambiente
+├── n8n_data/           # (Criado após a 1ª execução) Armazena dados do n8n localmente
+└── README.md           # Este arquivo
+```
 
-- [Configuração Local](docs/local-setup.md)
-- [Deploy AWS](docs/aws-deployment.md)
-- [Otimização de Custos](docs/cost-optimization.md)
-- [Monitoramento](docs/monitoring.md)
-- [Solução de Problemas](docs/troubleshooting.md)
+## Configuração para Produção (AWS)
 
-## 🤝 Contribuição
+Para implantar em produção na AWS, a abordagem recomendada é usar uma instância EC2 com Docker, conectada a um serviço de banco de dados como o AWS RDS (PostgreSQL).
 
-1. Fork o projeto
-2. Crie uma branch para sua feature
-3. Commit suas mudanças
-4. Push para a branch
-5. Abra um Pull Request
+1.  **Infraestrutura AWS**:
+    *   Provisione uma instância EC2 (ex: `t3.small` ou superior).
+    *   Provisione um banco de dados PostgreSQL no AWS RDS.
+    *   Configure um Security Group para permitir tráfego na porta `80/443` (para acesso web) e `5432` (do EC2 para o RDS).
 
-## 📄 Licença
+2.  **Configuração do Servidor**:
+    *   Instale Docker e Docker Compose na instância EC2.
+    *   Clone este repositório.
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
+3.  **Configuração do `.env` de Produção**:
+    *   Crie um arquivo `.env` no servidor. **NÃO** comite este arquivo no Git.
+    *   Descomente e preencha as variáveis de banco de dados (`DB_TYPE`, `DB_POSTGRESDB_*`) com as credenciais do seu RDS.
+    *   Altere `N8N_HOST` para `0.0.0.0`.
+    *   Defina o `WEBHOOK_URL` para o seu domínio público (ex: `https://n8n.agrovalue.com.br`).
 
-## 🆘 Suporte
+4.  **Ative o Serviço de Banco de Dados**:
+    *   No arquivo `docker-compose.yml`, descomente a seção do serviço `db` se você optar por rodar o PostgreSQL no mesmo host (não recomendado para produção em larga escala, prefira o RDS).
 
-Para suporte, abra uma issue no GitHub ou entre em contato através do email.
+5.  **Reverse Proxy (Obrigatório para HTTPS)**:
+    *   Configure um reverse proxy como Nginx ou Caddy na instância EC2 para gerenciar o tráfego de entrada, apontar para o contêiner do n8n (`http://localhost:5678`) e, crucialmente, para configurar o SSL/TLS (HTTPS).
 
----
+6.  **Deploy**:
+    *   Execute `docker-compose up -d` no servidor.
 
-**Desenvolvido para AgroValue** 🌱
+## Comandos Úteis do Docker Compose
+
+- **Parar os serviços**: `docker-compose down`
+- **Ver os logs**: `docker-compose logs -f n8n`
+- **Reiniciar os serviços**: `docker-compose restart`

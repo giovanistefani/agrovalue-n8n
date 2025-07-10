@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  n8n:
+    image: n8nio/n8n
+    container_name: agrovalue_n8n
+    restart: always
+    ports:
+      # Mapeia a porta 5678 do contêiner para a porta 5678 do host
+      # Apenas na interface de loopback (localhost) por segurança.
+      # Em produção, um reverse proxy (Nginx) deve ser o ponto de entrada.
+      - "127.0.0.1:5678:5678"
+    env_file:
+      - .env
+    volumes:
+      # Monta um volume local para persistir os dados do n8n
+      - ./n8n_data:/home/node/.n8n
+
+  # --- Seção Opcional para Banco de Dados em Produção ---
+  # Para produção, é altamente recomendado usar PostgreSQL.
+  # Você pode usar o AWS RDS (preferencial) ou descomentar este serviço
+  # para rodar um contêiner PostgreSQL junto com o n8n.
+  #
+  # db:
+  #   image: postgres:14
+  #   container_name: agrovalue_n8n_db
+  #   restart: always
+  #   environment:
+  #     - POSTGRES_USER=${DB_POSTGRESDB_USER}
+  #     - POSTGRES_PASSWORD=${DB_POSTGRESDB_PASSWORD}
+  #     - POSTGRES_DB=${DB_POSTGRESDB_DATABASE}
+  #   volumes:
+  #     - ./postgres_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${DB_POSTGRESDB_USER} -d ${DB_POSTGRESDB_DATABASE}"]
