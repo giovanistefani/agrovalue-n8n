@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   n8n:
     image: n8nio/n8n
@@ -12,6 +10,7 @@ services:
       - "127.0.0.1:5678:5678"
     env_file:
       - .env
+    user: "1000:1000"
     volumes:
       # Monta um volume local para persistir os dados do n8n
       - ./n8n_data:/home/node/.n8n

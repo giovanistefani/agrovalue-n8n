@@ -97,3 +97,12 @@ Para implantar em produção na AWS, a abordagem recomendada é usar uma instân
 - **Parar os serviços**: `docker-compose down`
 - **Ver os logs**: `docker-compose logs -f n8n`
 - **Reiniciar os serviços**: `docker-compose restart`
+
+
+# API OpenWeatherMap
+
+- http://api.openweathermap.org/data/2.5/weather?q=Florianopolis&appid=80fdc51d67cfadd06299af66929eb047&units=metric&lang=pt_br 
+
+/home/giovani/git/agrovalue-n8n/data
+
+[text](../../Downloads)
